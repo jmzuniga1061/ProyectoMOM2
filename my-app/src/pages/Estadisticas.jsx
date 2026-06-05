@@ -1,20 +1,39 @@
-import { Card, Statistic, Row, Col } from "antd";
+import { Card, Statistic, Row, Col, Spin, Alert } from "antd";
 import { Pie } from "@ant-design/charts";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import api from "../services/services";
+import "../styless/Estadisticas.css";
 
 export default function Estadisticas() {
-  // Ejemplo de datos simulados (en un proyecto real vendrían de contexto o props)
-  const [tareas] = useState([
-    { nombre: "Estudiar React", prioridad: "Alta", completada: true },
-    { nombre: "Hacer ejercicio", prioridad: "Media", completada: false },
-    { nombre: "Leer un libro", prioridad: "Baja", completada: false },
-  ]);
+  const [tareas, setTareas] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const cargarTareas = async () => {
+    try {
+      setError(null);
+      const res = await api.get("/actividades");
+      console.log(res.data);
+      setTareas(res.data);
+    } catch (err) {
+      console.error("Error cargando tareas:", err);
+      setError("Error al cargar las estadísticas");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    cargarTareas();
+    // Recargar datos cada 5 segundos
+    const intervalo = setInterval(cargarTareas, 5000);
+    return () => clearInterval(intervalo);
+  }, []);
 
   const total = tareas.length;
-  const completadas = tareas.filter((t) => t.completada).length;
+  const completadas = tareas.filter((t) => t.completado).length;
   const pendientes = total - completadas;
 
-  // Datos para el gráfico circular
   const data = [
     { type: "Completadas", value: completadas },
     { type: "Pendientes", value: pendientes },
@@ -37,30 +56,43 @@ export default function Estadisticas() {
   };
 
   return (
-    <div style={{ maxWidth: "800px", margin: "50px auto" }}>
+    <div className="estadisticas-container">
       <h1>Estadísticas</h1>
-      <Row gutter={16} style={{ marginBottom: "30px" }}>
-        <Col span={8}>
-          <Card>
-            <Statistic title="Total de tareas" value={total} />
+      {error && <Alert message={error} type="error" showIcon style={{ marginBottom: "20px" }} />}
+      {loading ? (
+        <Spin size="large" style={{ display: "flex", justifyContent: "center", padding: "50px" }} />
+      ) : (
+        <>
+          <Row gutter={16} className="estadisticas-row">
+            <Col span={8}>
+              <Card>
+                <Statistic title="Total de tareas" value={total} />
+              </Card>
+            </Col>
+            <Col span={8}>
+              <Card>
+                <Statistic
+                  title="Completadas"
+                  value={completadas}
+                  valueStyle={{ color: "#52c41a" }}
+                />
+              </Card>
+            </Col>
+            <Col span={8}>
+              <Card>
+                <Statistic
+                  title="Pendientes"
+                  value={pendientes}
+                  valueStyle={{ color: "#f5222d" }}
+                />
+              </Card>
+            </Col>
+          </Row>
+          <Card className="estadisticas-grafico">
+            <Pie {...config} />
           </Card>
-        </Col>
-        <Col span={8}>
-          <Card>
-            <Statistic title="Completadas" value={completadas} valueStyle={{ color: "green" }} />
-          </Card>
-        </Col>
-        <Col span={8}>
-          <Card>
-            <Statistic title="Pendientes" value={pendientes} valueStyle={{ color: "red" }} />
-          </Card>
-        </Col>
-      </Row>
-
-      
-      <Card>
-        <Pie {...config} />
-      </Card>
+        </>
+      )}
     </div>
   );
 }
