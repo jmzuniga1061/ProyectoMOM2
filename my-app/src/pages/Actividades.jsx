@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Input, Select, Button, List, Typography } from "antd";
-import api from "../services/services"; // 👈 importamos la configuración de Axios
+import api from "../services/services"; 
 import "../styless/Actividades.css";
 
 const { Text } = Typography;
@@ -11,7 +11,7 @@ export default function Actividades() {
   const [lista, setLista] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Cargar tareas desde el backend al montar
+  
   useEffect(() => {
     cargarTareas();
   }, []);
@@ -19,7 +19,7 @@ export default function Actividades() {
   const cargarTareas = async () => {
     setLoading(true);
     try {
-      const res = await api.get("/actividades"); // 👈 usamos api
+      const res = await api.get("/actividades"); 
       setLista(res.data);
     } catch (err) {
       console.error("Error cargando tareas:", err);
@@ -33,7 +33,7 @@ export default function Actividades() {
     await api.post("/actividades", {
       nombre: tarea,
       prioridad,
-    }); // 👈 usamos api
+    }); 
     await cargarTareas();
     setTarea("");
     setPrioridad("Alta");
@@ -41,15 +41,15 @@ export default function Actividades() {
 
   const completarTarea = async (id, completado) => {
     if (completado) {
-      // Si ya está completada, desmarcar no está implementado en backend
+      
       return;
     }
-    await api.patch(`/actividades/${id}/completar`); // 👈 usamos api
+    await api.patch(`/actividades/${id}/completar`);  
     await cargarTareas();
   };
 
   const eliminarTarea = async (id) => {
-    await api.delete(`/actividades/${id}`); // 👈 usamos api
+    await api.delete(`/actividades/${id}`);  
     await cargarTareas();
   };
 

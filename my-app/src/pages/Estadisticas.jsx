@@ -25,7 +25,6 @@ export default function Estadisticas() {
 
   useEffect(() => {
     cargarTareas();
-    // Recargar datos cada 5 segundos
     const intervalo = setInterval(cargarTareas, 5000);
     return () => clearInterval(intervalo);
   }, []);
@@ -52,7 +51,7 @@ export default function Estadisticas() {
       style: { fontSize: 14, textAlign: "center" },
     },
     interactions: [{ type: "element-active" }],
-    colors: ["#52c41a", "#f5222d"], // verde = completadas, rojo = pendientes
+    colors: ["#52c41a", "#f5222d"], 
   };
 
   return (
